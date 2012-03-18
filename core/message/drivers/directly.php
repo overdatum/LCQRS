@@ -1,9 +1,9 @@
 <?php namespace LCQRS\Message\Drivers;
 
-use Laravel\Event as MessagingService;
+use Laravel\Event;
 use Closure;
 
-class Event {
+class Directly {
 
 	/**
 	 * Publish a message to a channel
@@ -11,9 +11,9 @@ class Event {
 	 * @param  string  $key
 	 * @return void
 	 */
-	public function pub($channel, $message)
+	public function publish($channel, $arguments)
 	{
-		MessagingService::fire($channel, $message);
+		Event::fire($channel, $arguments);
 	}
 
 	/**
@@ -23,9 +23,9 @@ class Event {
 	 * @param  closure  $callback
 	 * @return void
 	 */
-	public function sub($channel, Closure $callback)
+	public function subscribe($channel, Closure $callback)
 	{
-		MessagingService::listen($channel, $callback);
+		Event::listen($channel, $callback);
 	}
 
 }

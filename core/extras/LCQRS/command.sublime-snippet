@@ -3,9 +3,10 @@
 
 class ${2:CommandName} {
 
-	public function __construct(\$attributes)
+	public function __construct(\$uuid, \$attributes)
 	{
 		\$this->attributes = \$attributes;
+		\$this->attributes['uuid'] = \$uuid;
 	}
 
 }]]></content>

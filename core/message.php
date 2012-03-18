@@ -47,13 +47,15 @@ class Message {
 	 */
 	protected static function factory($driver)
 	{
+		if( ! $driver) $drive = Config::get('lcqrs::message.driver');
+
 		switch ($driver)
 		{
 			case 'redis':
 				return new Message\Drivers\Redis(Redis::db());
 
-			case 'event':
-				return new Message\Drivers\Event;
+			case 'directly':
+				return new Message\Drivers\Directly;
 
 			default:
 				throw new \Exception("Message driver {$driver} is not supported.");
@@ -64,11 +66,8 @@ class Message {
 	 * Magic Method for calling the methods on the default message driver.
 	 *
 	 * <code>
-	 *		// Call the "pub" method on the default message driver
-	 *		$name = Message::pub('mychannel', 'Hello Subscribers!');
-	 *
-	 *		// Call the "sub" method on the default message driver
-	 *		Message::sub('mychannel', function($message)
+	 *		// Call the "subscribe" method on the default message driver
+	 *		Message::subscribe('mychannel', function($message)
 	 *		{
 	 *			echo $message;
 	 *		});

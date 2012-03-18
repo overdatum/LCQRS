@@ -1,3 +1,7 @@
-<?php return array(
-	'driver' => 'event'
+<?php
+
+return array(
+
+	'driver' => 'directly'
+
 );

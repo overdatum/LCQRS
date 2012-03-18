@@ -25,7 +25,7 @@ class Entity {
 		}
 	}
 
-	public function apply_event($event, $add = true)
+	public function apply($event, $add = true)
 	{
 		if($add)
 		{
@@ -46,7 +46,7 @@ class Entity {
 		$event_name = array_pop($segments);
 		$underscored_event_name = uncamelcase($event_name);
 
-		return 'apply_'.$underscored_event_name;
+		return 'on_'.$underscored_event_name;
 	}
 
 	protected function get_aggregate_name()
@@ -60,7 +60,7 @@ class Entity {
 	{
 		foreach($events as $event)
 		{
-			$this->apply_event($event, false);
+			$this->apply($event, false);
 		}
 	}
 

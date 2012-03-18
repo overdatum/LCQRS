@@ -1,12 +1,12 @@
-<?php namespace Jackzz\Repositories;
+<?php namespace App\Repositories;
 
-use Jackzz\Entities\Account;
+use App\Entities\Account;
 
 class AccountRepository {
 
-	public function get($uuid)
+	public function get_by_uuid($uuid)
 	{
-		return DB::table('accounts')->where_id($uuid)->first();;
+		return new Account($uuid);
 	}
 
 }

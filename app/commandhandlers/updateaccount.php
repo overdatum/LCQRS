@@ -1,5 +1,7 @@
 <?php namespace App\CommandHandlers;
 
+use LCQRS\Bus;
+use App\Events\AccountUpdated;
 use App\AggregateRoots\Account;
 
 class UpdateAccount {
@@ -8,6 +10,7 @@ class UpdateAccount {
 	{
 		$account = new Account;
 		$account->update($command->attributes);
+		Bus::publish(new AccountUpdated($command->attributes));
 	}
 
 }

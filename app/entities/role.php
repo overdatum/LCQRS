@@ -7,7 +7,7 @@ class Role extends Entity {
 
 	public function create($attributes)
 	{
-		$this->apply_event(new RoleCreated($attributes));
+		$this->apply(new RoleCreated($attributes));
 	}
 
 

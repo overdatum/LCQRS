@@ -13,22 +13,20 @@ class Campaign extends AggregateRoot {
 
 	public function create_draft($attributes)
 	{
-		$this->apply_event(new CampaignDraftCreated($attributes));
-		return $this;
+		$this->apply(new CampaignDraftCreated($attributes));
 	}
 
 	public function update($attributes)
 	{
-		$this->apply_event(new CampaignUpdated($this->uuid, $attributes));
-		return $this;
+		$this->apply(new CampaignUpdated($this->uuid, $attributes));
 	}
 
-	protected function apply_created_event(CampaignCreated $event)
+	protected function on_created_event(CampaignCreated $event)
 	{
 		$this->attributes = $event->attributes;
 	}
 
-	protected function apply_updated_event(CampaignUpdated $event)
+	protected function on_updated_event(CampaignUpdated $event)
 	{
 		$this->attributes = array_merge($this->attributes, $event->attributes);
 	}
