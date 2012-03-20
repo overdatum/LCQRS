@@ -9,18 +9,30 @@ class Entity {
 
 	public $attributes = array();
 
+	/**
+	 * Magic Get method, allowing you to have very simple DTO's
+	 */
+	public function __get($key)
+	{
+		return $this->attributes[$key];
+	}
+
+	/**
+	 * Magic Set method, allowing you to have very simple DTO's
+	 */
+	public function __set($key, $value)
+	{
+		$this->attributes[$key] = $value;
+	}
+
 	public function __construct($uuid = null, $load_from_history = true)
 	{
 		if(is_null($uuid)) return $this;
 
-		$this->attributes['uuid'] = $uuid;
+		$this->uuid = $uuid;
 		if($load_from_history)
 		{
-			$segments = explode('\\', get_class($this));
-			$aggregateroot_name = array_pop($segments);
-	
-			$eventstore = IoC::resolve('EventStore');
-			$events = $eventstore->get($this->attributes['uuid'], $aggregateroot_name);
+			$events = EventStore::get_all_events($this->uuid);
 			$this->load_from_history($events);
 		}
 	}
@@ -29,8 +41,7 @@ class Entity {
 	{
 		if($add)
 		{
-			$eventstore = IoC::resolve('EventStore');
-			$eventstore->put($event->attributes['uuid'], $this->get_aggregate_name(), $event);
+			EventStore::add($this->uuid, $event);
 		}
 		
 		$apply_method = $this->to_apply_method($event);
@@ -58,6 +69,7 @@ class Entity {
 
 	public function load_from_history($events)
 	{
+		var_dump($events);
 		foreach($events as $event)
 		{
 			$this->apply($event, false);
