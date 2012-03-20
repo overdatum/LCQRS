@@ -1,4 +1,4 @@
-<?php namespace LCQRS;
+<?php namespace LCQRS\Model;
 
 use Exception;
 use Laravel\IoC;
@@ -7,14 +7,19 @@ use Laravel\Event;
 
 class Entity {
 
-	public $attributes = array();
+	public $_attributes = array();
+
+	public $_changes = array();
 
 	/**
 	 * Magic Get method, allowing you to have very simple DTO's
 	 */
 	public function __get($key)
 	{
-		return $this->attributes[$key];
+		if($key == 'attributes')
+			return $this->_attributes;
+		
+		return $this->_attributes[$key];
 	}
 
 	/**
@@ -22,28 +27,27 @@ class Entity {
 	 */
 	public function __set($key, $value)
 	{
-		$this->attributes[$key] = $value;
+		if($key == 'attributes')
+			$this->_attributes = $value;
+		else
+			$this->_attributes[$key] = $value;
 	}
 
-	public function __construct($uuid = null, $load_from_history = true)
+	public function take_changes()
 	{
-		if(is_null($uuid)) return $this;
+		$changes = $this->_changes;
+		unset($this->_changes);
 
-		$this->uuid = $uuid;
-		if($load_from_history)
-		{
-			$events = EventStore::get_all_events($this->uuid);
-			$this->load_from_history($events);
-		}
+		return $changes;
 	}
 
-	public function apply($event, $add = true)
+	protected function apply($event, $is_new = true)
 	{
-		if($add)
+		if($is_new)
 		{
-			EventStore::add($this->uuid, $event);
+			$this->_changes[] = $event;
 		}
-		
+
 		$apply_method = $this->to_apply_method($event);
 		if(method_exists(get_called_class(), $apply_method))
 		{
@@ -57,7 +61,7 @@ class Entity {
 		$event_name = array_pop($segments);
 		$underscored_event_name = uncamelcase($event_name);
 
-		return 'on_'.$underscored_event_name;
+		return 'apply_'.$underscored_event_name;
 	}
 
 	protected function get_aggregate_name()
@@ -69,7 +73,6 @@ class Entity {
 
 	public function load_from_history($events)
 	{
-		var_dump($events);
 		foreach($events as $event)
 		{
 			$this->apply($event, false);
