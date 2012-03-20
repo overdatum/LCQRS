@@ -1,6 +1,7 @@
 <?php namespace App\AggregateRoots;
 
-use LCQRS\AggregateRoot;
+use LCQRS\Model\EntityList;
+use LCQRS\Model\AggregateRoot;
 
 use App\Entities\Role;
 
@@ -11,6 +12,11 @@ use App\Events\RolesAssignedToAccount;
 use App\Events\RolesUnAssignedFromAccount;
 
 class Account extends AggregateRoot {
+
+	public function __construct()
+	{
+		$this->roles = new EntityList;
+	}
 
 	public function register($attributes)
 	{
@@ -34,29 +40,29 @@ class Account extends AggregateRoot {
 
 
 
-	protected function on_account_registered(AccountRegistered $event)
+	protected function apply_account_registered(AccountRegistered $event)
 	{
 		$this->attributes = $event->attributes;
 	}
 
-	protected function on_account_updated(AccountUpdated $event)
+	protected function apply_account_updated(AccountUpdated $event)
 	{
 		$this->attributes = array_merge($this->attributes, $event->attributes);
 	}
 
-	protected function on_roles_assigned_to_account(RolesAssignedToAccount $event)
+	protected function apply_roles_assigned_to_account(RolesAssignedToAccount $event)
 	{
 		foreach($event->attributes['role_uuids'] as $role_uuid)
 		{
-			$this->attributes['roles'][$role_uuid] = new Role($role_uuid);
+			//$this->roles->add(new Role($role_uuid));
 		}
 	}
 
-	protected function on_roles_unassigned_from_account(RolesUnAssignedFromAccount $event)
+	protected function apply_roles_unassigned_from_account(RolesUnAssignedFromAccount $event)
 	{
 		foreach($event->attributes['role_uuids'] as $role_uuid)
 		{
-			unset($this->attributes['roles'][$role_uuid]);
+			//unset($this->attributes['roles'][$role_uuid]);
 		}
 	}
 

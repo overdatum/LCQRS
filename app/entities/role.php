@@ -1,6 +1,7 @@
 <?php namespace App\Entities;
 
-use LCQRS\Entity;
+use LCQRS\Model\Entity;
+
 use App\Events\RoleCreated;
 
 class Role extends Entity {
