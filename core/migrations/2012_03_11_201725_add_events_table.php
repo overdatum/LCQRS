@@ -12,8 +12,8 @@ class LCQRS_Add_Events_Table {
 		Schema::create('events', function($table)
 		{
 			$table->increments('id');
-			$table->string('aggregateroot_uuid')->index();
-			$table->string('aggregateroot_name');
+			$table->string('uuid')->index();
+			$table->integer('version');
 			$table->text('event');
 		});
 	}
