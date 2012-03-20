@@ -8,7 +8,7 @@ class CreateRole {
 	
 	public function __construct($command)
 	{
-		$role = new Role;
+		$role = new Role($command->attributes['uuid']);
 		$role->create($command->attributes);
 		Bus::publish(new RoleCreated($command->attributes));
 	}

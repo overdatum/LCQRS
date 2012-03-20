@@ -8,7 +8,7 @@ class RegisterAccount {
 
 	public function __construct($command)
 	{
-		$account = new Account;
+		$account = new Account($command->attributes['uuid']);
 		$account->register($command->attributes);
 		Bus::publish(new AccountRegistered($command->attributes));
 	}

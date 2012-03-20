@@ -8,7 +8,7 @@ class UnassignRolesFromAccount {
 	
 	public function __construct($command)
 	{
-		$account = new Account;
+		$account = new Account($command->attributes['uuid']);
 		$account->unassign_roles($command->attributes);
 		Bus::publish(new RolesUnassignedFromAccount($command->attributes));
 	}

@@ -8,7 +8,7 @@ class AssignRolesToAccount {
 	
 	public function __construct($command)
 	{
-		$account = new Account;
+		$account = new Account($command->attributes['uuid']);
 		$account->assign_roles($command->attributes);
 		Bus::publish(new RolesAssignedToAccount($command->attributes));
 	}
