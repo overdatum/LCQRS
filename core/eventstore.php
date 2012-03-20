@@ -1,25 +1,79 @@
 <?php namespace LCQRS;
 
+use Laravel\Config;
 use Laravel\Database as DB;
 
 class EventStore {
 
-	public static function put($aggregateroot_uuid, $aggregateroot_name, $event)
-	{
-		DB::table('events')->insert(array('aggregateroot_uuid' => $aggregateroot_uuid, 'aggregateroot_name' => $aggregateroot_name, 'event' => serialize($event)));
-	}
+	/**
+	 * All of the active EventStore drivers.
+	 *
+	 * @var array
+	 */
+	public static $drivers = array();
 
-	public static function get($aggregateroot_uuid, $aggregateroot_name)
+	/**
+	 * Get the EventStore driver instance.
+	 *
+	 * If no driver name is specified, the default will be returned.
+	 *
+	 * <code>
+	 *		// Get the default message driver instance
+	 *		$driver = EventStore::driver();
+	 *
+	 *		// Get a specific message driver instance by name
+	 *		$driver = EventStore::driver('memory');
+	 * </code>
+	 *
+	 * @param  string        $driver
+	 * @return EventStore\Drivers\Driver
+	 */
+	public static function driver($driver = null)
 	{
-		$events = array();
+		if (is_null($driver)) $driver = Config::get('lcqrs::eventstore.driver');
 
-		$rows = DB::table('events')->where_aggregateroot_uuid($aggregateroot_uuid)->where_aggregateroot_name($aggregateroot_name)->order_by('id', 'ASC')->get();
-		foreach($rows as $row)
+		if ( ! isset(static::$drivers[$driver]))
 		{
-			$events[] = unserialize($row->event);
+			static::$drivers[$driver] = static::factory($driver);
 		}
 
-		return $events;
+		return static::$drivers[$driver];
+	}
+
+	/**
+	 * Create a new message driver instance.
+	 *
+	 * @param  string  $driver
+	 * @return EventStore\Drivers\Driver
+	 */
+	protected static function factory($driver)
+	{
+		if( ! $driver) $drive = Config::get('lcqrs::eventstore.driver');
+
+		switch ($driver)
+		{
+			case 'memory':
+				return new EventStore\Drivers\Memory;
+
+			case 'pdo':
+				return new EventStore\Drivers\PDO;
+
+			default:
+				throw new \Exception("EventStore driver {$driver} is not supported.");
+		}
+	}
+
+	/**
+	 * Magic Method for calling the methods on the default EventStore driver.
+	 *
+	 * <code>
+	 *		// Get all events for an Entity by it's UUID
+	 *		EventStore::get_all_events($uuid)
+	 * </code>
+	 */
+	public static function __callStatic($method, $parameters)
+	{
+		return call_user_func_array(array(static::driver(), $method), $parameters);
 	}
 
 }
