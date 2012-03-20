@@ -1,5 +1,6 @@
 <?php
 
+use LCQRS\Repository;
 use LCQRS\Bus;
 use LCQRS\Libraries\UUID;
 
@@ -16,20 +17,19 @@ class LCQRS_Testing_Controller extends Controller {
 	
 	public function action_index()
 	{
-		$uuid = 'f0f709a1-d1a9-40c4-a0c8-8d11a7f4e113'; //UUID::generate();
+		$account_uuid = UUID::generate();
 		$admin_role_uuid = UUID::generate();
 		$agent_role_uuid = UUID::generate();
 
 		Bus::send(new CreateRole($admin_role_uuid, array('key' => 'admin')));
 		Bus::send(new CreateRole($agent_role_uuid, array('key' => 'agent')));
 
-		$account = Bus::send(new RegisterAccount($uuid, array('first_name' => 'Koen', 'last_name' => 'Smeets')));
-		$account = Bus::send(new UpdateAccount($uuid, array('last_name' => 'Schmeets')));
-		$account = Bus::send(new AssignRolesToAccount($uuid, array('role_uuids' => array($admin_role_uuid, $agent_role_uuid))));
-		$account = Bus::send(new UnassignRolesFromAccount($uuid, array('role_uuids' => array($agent_role_uuid))));
+		Bus::send(new RegisterAccount($account_uuid, array('first_name' => 'Koen', 'last_name' => 'Smeets')));
+		Bus::send(new UpdateAccount($account_uuid, array('last_name' => 'Schmeets')));
+		Bus::send(new AssignRolesToAccount($account_uuid, array('role_uuids' => array($admin_role_uuid, $agent_role_uuid))));
+		Bus::send(new UnassignRolesFromAccount($account_uuid, array('role_uuids' => array($agent_role_uuid))));
 	
-		var_dump(new Account($uuid));
-		//var_dump(new Role('c955189b-60db-4c46-b115-003204d9ddc3'));
+		var_dump(Repository::load($account_uuid, new Account));
 	}
 
 }
